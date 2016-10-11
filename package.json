@@ -1,0 +1,9 @@
+{
+  "name": "foo",
+  "version": "0.0.0",
+  "dependencies": {
+    "htmlparser2": "^3.9.1"
+  },
+  "devDependencies": {
+  }
+}
