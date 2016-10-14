@@ -1,7 +1,6 @@
 'use strict';
 
 const pg = require('pg');
-// const pgp = require('pg-promise')({ ssl: process.env.NODE_ENV !== undefined });
 const linkLoader = require('./get-links-from-site');
 
 if( process.env.NODE_ENV !== undefined ){
