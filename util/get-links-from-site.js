@@ -28,7 +28,13 @@ const parser = new htmlparser.Parser({
     onclosetag: ()=> {
         if( storyLink ){
             storyLink = false;
-            link.text = decodeURIComponent( linkText );
+            if( linkText.indexOf( '%' ) !== -1 ){
+                // calling decodeURI... will error if a '%' is in the string; so, split it
+                // apart, run decodeURI.. on the pieces, and join them back together.
+                linkText = linkText.split('%').map( decodeURIComponent ).join('%');
+            } else {
+                link.text = decodeURIComponent( linkText );
+            }
             links.push( link );
             link = {};
             linkText = '';
