@@ -43,7 +43,8 @@ const parser = new htmlparser.Parser({
 });
 
 const returnMatchingLinks = ( headlines )=> {
-    let matches = { "how": [], "what": [], "why": [] },
+    let askHN = /^Ask HN/,
+        matches = { "how": [], "what": [], "why": [] },
         regex,
         regexes = {
             // only match 'how' when it's at the beginning of the string or part
@@ -55,7 +56,7 @@ const returnMatchingLinks = ( headlines )=> {
 
     for( linkText of headlines ) {
         for( regex in regexes ) {
-            if( regexes[ regex ].test( linkText.text ) ){
+            if( !askHN.test( linkText.text ) && regexes[ regex ].test( linkText.text ) ){
                 matches[ regex ].push( linkText );
             }
         }

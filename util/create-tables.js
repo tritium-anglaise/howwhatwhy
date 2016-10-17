@@ -18,11 +18,12 @@ function createLinksTable() {
 	db.query( 'CREATE TABLE public.links( id INT PRIMARY KEY NOT NULL, href VARCHAR(255) NOT NULL, text VARCHAR(255) NOT NULL);' )
 		.then(function() {
 			db.query( 'CREATE UNIQUE INDEX links_id_uindex ON public.links (id);' );
-		}).then(function() {
-		    db.end();
-			process.exit(0);
-		});
+		})
 }
 
 createHowwhatwhyTable()
-	.then( createLinksTable );
+	.then( createLinksTable )
+	.then( function() {
+		db.end();
+		process.exit(0);
+	});
