@@ -29,8 +29,8 @@ const parser = new htmlparser.Parser({
         if( storyLink ){
             storyLink = false;
             if( linkText.indexOf( '%' ) !== -1 ){
-                // calling decodeURI... will error if a '%' is in the string; so, split it
-                // apart, run decodeURI.. on the pieces, and join them back together.
+                // decodeURI will error if a '%' is in the string; so, split it apart,
+                // run decodeURI on the pieces, and join them back together.
                 linkText = linkText.split('%').map( decodeURIComponent ).join('%');
             } else {
                 link.text = decodeURIComponent( linkText );
@@ -43,7 +43,7 @@ const parser = new htmlparser.Parser({
 });
 
 const returnMatchingLinks = ( headlines )=> {
-    let askHN = /^Ask HN/,
+    let hnSpecific = /^(Ask|Show) HN/,
         matches = { "how": [], "what": [], "why": [] },
         regex,
         regexes = {
@@ -56,7 +56,7 @@ const returnMatchingLinks = ( headlines )=> {
 
     for( linkText of headlines ) {
         for( regex in regexes ) {
-            if( !askHN.test( linkText.text ) && regexes[ regex ].test( linkText.text ) ){
+            if( !hnSpecific.test( linkText.text ) && regexes[ regex ].test( linkText.text ) ){
                 matches[ regex ].push( linkText );
             }
         }
