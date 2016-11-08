@@ -3,7 +3,7 @@
 const htmlparser = require('htmlparser2');
 const https = require('https');
 
-let link = {},
+var link = {},
     links = [],
     linkText = '',
     storyLink = false;
@@ -43,7 +43,7 @@ const parser = new htmlparser.Parser({
 });
 
 const returnMatchingLinks = ( headlines )=> {
-    let hnSpecific = /^(Ask|Show) HN/,
+    var hnSpecific = /^(Ask|Show) HN/,
         matches = { "how": [], "what": [], "why": [] },
         regex,
         regexes = {

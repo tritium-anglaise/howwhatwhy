@@ -1,34 +1,27 @@
 'use strict';
 
-const pg = require('pg');
+const db = require('../db/get-connection').db;
 const linkLoader = require('./get-links-from-site');
 
-if( process.env.NODE_ENV !== undefined ){
-	pg.defaults.ssl = true;
-}
-
-let db = new pg.Client( process.env.DATABASE_URL );
-db.connect();
-
-let insertLinkIntoDatabase = ( link ) => {
-	db.query('INSERT INTO links(id, href, text) VALUES($1, $2, $3)', [link.id, link.href, link.text])
+var insertLinkIntoDatabase = ( link ) => {
+	db.one('INSERT INTO links(id, href, text) VALUES($1, $2, $3)', [link.id, link.href, link.text])
 		.catch((error)=> {
 			//meh
 		});
 };
 
-let writeSummaryToDatabase = ( ids )=> {
-	return db.query(
+var writeSummaryToDatabase = ( ids )=> {
+	return db.none(
 		`INSERT INTO howwhatwhy(hows, whats, whys) VALUES('{${ids.how.join( ',' )}}', '{${ids.what.join( ',' )}}', '{${ids.why.join( ',' )}}')`
 	);
 };
 
 linkLoader.getLinks()
 	.then( ( links )=> {
-		let linkIds = {};
+		var linkIds = {};
 
-		for( let type in links ) {
-			let ids = [];
+		for( var type in links ) {
+			var ids = [];
 
 			if( links[type].length !== 0 ) {
 				for( let link of links[type] ) {
@@ -42,10 +35,8 @@ linkLoader.getLinks()
 
 		writeSummaryToDatabase( linkIds ).catch((err)=> {
 			console.log( err );
-			db.end();
 			process.exit(1);
 		}).then(()=>{
-			db.end();
 			process.exit(0);
 		});
 	});

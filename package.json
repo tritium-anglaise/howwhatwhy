@@ -3,7 +3,10 @@
   "version": "0.0.0",
   "dependencies": {
     "htmlparser2": "^3.9.1",
-    "pg": "^6.1.0"
+    "pg-promise": "^5.3.5"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "engines": {
+    "node": "6.9.1"
+  }
 }
