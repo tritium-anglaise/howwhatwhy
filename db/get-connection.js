@@ -17,7 +17,7 @@ if( re.test( process.env.DATABASE_URL )) {
 			host: '',
 			password: parts[0].split(':')[1],
 			ssl: true,
-			username: parts[0].split(':')[0],
+			user: parts[0].split(':')[0],
 		};
 
 		parts = parts[1].split('/');
