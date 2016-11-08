@@ -4,7 +4,7 @@ var db = require('../db/get-connection').db;
 
 var api = require( '../api/api'),
     http = require( 'http' ),
-    server = http.createServer().listen( 8000 ),
+    server = http.createServer().listen( process.env.PORT ),
     types = {
         json: 'application/json',
         text: 'text/plain'
