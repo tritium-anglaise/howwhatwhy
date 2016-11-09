@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "dependencies": {
     "htmlparser2": "^3.9.1",
-    "pg-promise": "^5.3.5"
+    "pg-promise": "^5.3.5",
+    "redis": "^2.6.3"
   },
   "devDependencies": {},
   "engines": {

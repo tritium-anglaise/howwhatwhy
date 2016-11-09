@@ -5,7 +5,7 @@ function getCounts( param ) {
 
 	return new Promise(( resolve, reject ) => {
 		db.func('get_counts', param).then(( response )=> {
-			resolve({ status: 200, type: 'json', body: JSON.stringify(response[0])});
+			resolve( JSON.stringify(response[0]) );
 		}).catch(( err )=> {
 			reject( err );
 		})
@@ -17,7 +17,7 @@ function getHeadlines( param ) {
 
 	return new Promise(( resolve, reject ) => {
 		db.func('get_links', param).then(( response ) => {
-			resolve( {status: 200, type: 'json', body: JSON.stringify(response)} );
+			resolve( JSON.stringify( response) );
 		}).catch(( err ) => {
 			reject( err );
 		});

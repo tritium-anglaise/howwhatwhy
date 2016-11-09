@@ -4,6 +4,7 @@ var db = require('../db/get-connection').db;
 
 var api = require( '../api/api'),
     http = require( 'http' ),
+    redis = require( '../db/redis' ),
     server = http.createServer().listen( process.env.PORT ),
     types = {
         json: 'application/json',
@@ -32,29 +33,55 @@ var parseParam = ( param ) => {
     }
 };
 
+var returnResponseObj = ( partialResponse ) => {
+    var responseObj = {
+        body: partialResponse.body === undefined ? '' : partialResponse.body,
+        status: partialResponse.status === undefined ? 200 : partialResponse.status,
+        type: partialResponse.type === undefined ? types.text : types[ partialResponse.type ]
+    };
+
+    return responseObj;
+};
+
+var cacheInRedisAndResolve = ( resolver, redisKey, redisValue ) => {
+    redis.setKeyAndExpiry( redisKey, redisValue, 3660 );
+    resolver( returnResponseObj({body: redisValue, type: 'json'}) );
+};
+
 var processAPIRequest = ( requestParts ) => {
     return new Promise(( resolve, reject ) => {
-        var method, param;
+        var method, param, redisKey;
         [,,method,param=null ] = requestParts;
 
         if( api.methods[ method ] !== undefined ){
+            redisKey = method + ':' + param;
+
             if( param !== null && paramIsValid( param ) ){
-                resolve( api.methods[ method ]( parseParam( param ) ) );
+                redis.get( redisKey ).then(( redisResponse ) => {
+                    if( redisResponse !== null ){
+                        resolve( returnResponseObj({ body: redisResponse, type: 'json' }) );
+                    } else {
+                        // get the requested value from the database
+                        api.methods[ method ]( parseParam( param ) )
+                            .then(( pgResponse ) => {
+                                cacheInRedisAndResolve( resolve, redisKey, pgResponse );
+                            });
+                    }
+                });
             } else {
-                resolve( api.methods[ method ]( null ) );
+                api.methods[ method ]( null ).then(( pgResponse ) => {
+                    cacheInRedisAndResolve( resolve, redisKey, pgResponse );
+                });
             }
         } else {
-            reject( { status: 400, type: 'text', message: '' } );
+            reject( { status: 400, message: '' } );
         }
     });
 };
 
-var respond = ( res, status, type, body ) => {
-    type = type === undefined ? types.text : type;
-    body = body === undefined ? '' : body;
-
-    res.writeHead( status, {'Content-Type': types[type]} );
-    res.end( body );
+var respond = ( res, responseObj ) => {
+    res.writeHead( responseObj.status, {'Content-Type': types[responseObj.type]} );
+    res.end( responseObj.body );
 };
 
 server.on( 'request', function( req, res ) {
@@ -62,12 +89,12 @@ server.on( 'request', function( req, res ) {
 
     if( parts[1] === 'api' ) {
         processAPIRequest( parts )
-            .then(( data )=> {
-                respond( res, data.status, data.type, data.body );
-            }).catch(( data ) => {
-            respond( res, 500, 'text', data.toString() );
-        });
+            .then(( apiResponse )=> {
+                respond( res, apiResponse );
+            }).catch(( error ) => {
+                respond( res, returnResponseObj({ body: error.toString(), status: 500 }));
+            });
     } else {
-        respond( res, 200 );
+        respond( res, returnResponseObj({}) );
     }
 });

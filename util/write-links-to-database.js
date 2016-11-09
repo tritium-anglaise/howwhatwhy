@@ -1,13 +1,42 @@
 'use strict';
 
-const db = require('../db/get-connection').db;
-const linkLoader = require('./get-links-from-site');
+var api = require('../api/api'),
+	db = require('../db/get-connection').db,
+	linkLoader = require('./get-links-from-site'),
+	redis = require('../db/redis');
+
+var counter = 0,
+	days = [7,10,14,20,21,28,30];
+
+var decrementCounterAndKillProcess = () => {
+	counter -= 1;
+
+	if( counter === 0 ){
+	    process.exit(0);
+	}
+};
 
 var insertLinkIntoDatabase = ( link ) => {
 	db.one('INSERT INTO links(id, href, text) VALUES($1, $2, $3)', [link.id, link.href, link.text])
 		.catch((error)=> {
 			//meh
 		});
+};
+
+var updateRedis = ( param ) => {
+	var keySuffix = param === null ? '' : ':' + param;
+	counter += 4;
+
+	api.methods.counts( param ).then(( result ) => {
+		// console.log( result );
+		redis.set( ['counts' + keySuffix, result.body] ).then( decrementCounterAndKillProcess );
+		redis.expire( ['counts' + keySuffix, 3600] ).then( decrementCounterAndKillProcess );
+	});
+	api.methods.headlines( param ).then(( result ) => {
+		// console.log( result );
+		redis.set( ['headlines' + keySuffix, result.body] ).then( decrementCounterAndKillProcess );
+		redis.expire( ['headlines' + keySuffix, 3600] ).then( decrementCounterAndKillProcess );
+	})
 };
 
 var writeSummaryToDatabase = ( ids )=> {
@@ -36,7 +65,13 @@ linkLoader.getLinks()
 		writeSummaryToDatabase( linkIds ).catch((err)=> {
 			console.log( err );
 			process.exit(1);
-		}).then(()=>{
-			process.exit(0);
 		});
+	}).then(() => {
+		// cache today's results
+		updateRedis( null );
+
+		// cache results for days in the days array
+		for( let i in days ){
+			updateRedis( days[i] );
+		}
 	});
