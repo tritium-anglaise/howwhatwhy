@@ -2,6 +2,7 @@
   "name": "foo",
   "version": "0.0.0",
   "dependencies": {
+    "aws-sdk": "^2.7.14",
     "htmlparser2": "^3.9.1",
     "pg-promise": "^5.3.5"
   },

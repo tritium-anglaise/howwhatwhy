@@ -3,6 +3,7 @@
 var db = require('../db/get-connection').db;
 
 var api = require( '../api/api'),
+    dateRegEx = /(20[1-2][0-9])-([0-1][0-2])-([0-3][0-9])$/,
     http = require( 'http' ),
     server = http.createServer().listen( process.env.PORT ),
     types = {
@@ -10,7 +11,7 @@ var api = require( '../api/api'),
         text: 'text/plain'
     },
     validators = {
-        isDate: ( param ) => { return /(20[1-2][0-9])-([0-1][0-2])-([0-3][0-9])$/.test( param ); },
+        isDate: ( param ) => { return dateRegEx.test( param ); },
         isInteger: ( param ) => { return !isNaN(parseInt( param )); }
     };
 
