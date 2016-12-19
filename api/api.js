@@ -6,7 +6,7 @@ function returnDatabaseFunction( dbFuncName ) {
 
 		return new Promise(( resolve, reject ) => {
 			db.func(dbFuncName, param).then(( response )=> {
-				resolve({ status: 200, type: 'json', body: JSON.stringify(response[0])});
+				resolve({ status: 200, type: 'json', body: JSON.stringify(response)});
 			}).catch(( err )=> {
 				reject( err );
 			});
