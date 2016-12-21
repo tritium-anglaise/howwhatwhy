@@ -1,3 +1,10 @@
+DROP FUNCTION get_counts();
+DROP FUNCTION get_counts(VARCHAR(10));
+DROP FUNCTION get_counts(INTEGER);
+DROP FUNCTION get_links();
+DROP FUNCTION get_links(VARCHAR(10));
+DROP FUNCTION get_links(INTEGER);
+
 --
 -- get how/what/why counts for today
 --
@@ -49,7 +56,7 @@ LANGUAGE plpgsql;
 -- get the text and hrefs for today's links
 --
 CREATE OR REPLACE FUNCTION public.get_links()
-  RETURNS TABLE(href VARCHAR(255), linktext VARCHAR(255))
+  RETURNS TABLE(href VARCHAR(255), id INT, linktext VARCHAR(255))
 AS $$
 DECLARE
   _id INTEGER;
@@ -60,6 +67,7 @@ BEGIN
     UNION SELECT DISTINCT unnest(whys) from howwhatwhy where timestamp::date = current_date
   LOOP
     href := (select links.href from links where links.id = _id);
+    id := _id;
     linktext := (select links.text from links where links.id = _id);
     RETURN NEXT;
   END LOOP;
@@ -71,7 +79,7 @@ LANGUAGE plpgsql;
 -- get the text and hrefs for the past N days' links
 --
 CREATE OR REPLACE FUNCTION public.get_links( in_days INTEGER )
-  RETURNS TABLE(href VARCHAR(255), linktext VARCHAR(255))
+  RETURNS TABLE(href VARCHAR(255), id INT, linktext VARCHAR(255))
 AS $$
 DECLARE
   _id INTEGER;
@@ -83,6 +91,7 @@ BEGIN
   UNION SELECT DISTINCT unnest(whys) from howwhatwhy where timestamp::date BETWEEN current_date-number_of_days and current_date
   LOOP
     href := (select links.href from links where links.id = _id);
+    id := _id;
     linktext := (select links.text from links where links.id = _id);
     RETURN NEXT;
   END LOOP;
@@ -94,7 +103,7 @@ LANGUAGE plpgsql;
 -- get the text and hrefs for a specific day's links
 --
 CREATE OR REPLACE FUNCTION public.get_links( in_date VARCHAR(10) )
-  RETURNS TABLE(href VARCHAR(255), linktext VARCHAR(255))
+  RETURNS TABLE(href VARCHAR(255), id INT, linktext VARCHAR(255))
 AS $$
 DECLARE
   _date DATE := to_date(in_date, 'YYYY-MM-DD');
@@ -106,6 +115,7 @@ BEGIN
   UNION SELECT DISTINCT unnest(whys) from howwhatwhy where timestamp::date = _date
   LOOP
     href := (select links.href from links where links.id = _id);
+    id := _id;
     linktext := (select links.text from links where links.id = _id);
     RETURN NEXT;
   END LOOP;
