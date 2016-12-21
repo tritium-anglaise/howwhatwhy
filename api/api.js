@@ -1,4 +1,4 @@
-var db = require('../db/get-connection').db;
+var db = require('../db/db').db;
 
 function returnDatabaseFunction( dbFuncName ) {
 	return function( param ) {

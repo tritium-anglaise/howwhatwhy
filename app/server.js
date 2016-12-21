@@ -1,6 +1,6 @@
 'use strict';
 
-var db = require('../db/get-connection').db;
+var db = require('../db/db').db;
 
 var api = require( '../api/api'),
     dateRegEx = /(20[1-2][0-9])-([0-1][0-2])-([0-3][0-9])$/,

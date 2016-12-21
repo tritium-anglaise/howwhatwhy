@@ -1,7 +1,7 @@
 'use strict';
 
-var pgp = require('./get-connection').pgp,
-	db = require('./get-connection').db;
+var pgp = require('./db').pgp,
+	db = require('./db').db;
 
 db.any( pgp.QueryFile('./sql/stored-procedures.sql') )
 	.then(function() {

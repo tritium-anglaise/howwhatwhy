@@ -1,4 +1,5 @@
-const db = require('../db/get-connection').db;
+var pgp = require('pg-promise')(),
+	db = pgp( process.env.DATABASE_URL );
 
 var insertLinkIntoDatabase = ( link ) => {
 	db.one('INSERT INTO links(id, href, text) VALUES($1, $2, $3)', [link.id, link.href, link.text])
@@ -15,3 +16,5 @@ var writeSummaryToDatabase = ( ids )=> {
 
 exports.insertLinkIntoDatabase = insertLinkIntoDatabase;
 exports.writeSummaryToDatabase = writeSummaryToDatabase;
+exports.pgp = pgp;
+exports.db = db;

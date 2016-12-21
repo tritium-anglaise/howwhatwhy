@@ -1,6 +1,6 @@
 const linkLoader = require('./link-loader'),
 	api = require('../api/api'),
-	db = require('./db-access'),
+	db = require('../db/db.js'),
 	s3 = require('./s3');
 
 linkLoader.getLinks()
@@ -21,7 +21,7 @@ linkLoader.getLinks()
 		}
 
 		db.writeSummaryToDatabase( linkIds ).then(()=> {
-			api.methods.headlines().then((data) => {
+			api.methods.headlines(0).then((data) => {
 				s3.uploadToS3(data.body).then(()=> {
 					process.exit(0);
 				}).catch((err)=> {
