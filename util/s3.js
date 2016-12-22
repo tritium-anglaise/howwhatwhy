@@ -5,7 +5,7 @@ var api = require('../api/api'),
 function uploadToS3( jsonData ) {
 	var params = {
 		Bucket: 'howwhatwhy',
-		Body: jsonData,
+		Body: `var todaysData = ${jsonData}`,
 		ContentType: 'text/json',
 		Key: 'todays-data.json'
 	};

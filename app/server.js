@@ -54,7 +54,10 @@ var respond = ( res, status, type, body ) => {
     type = type === undefined ? types.text : type;
     body = body === undefined ? '' : body;
 
-    res.writeHead( status, {'Content-Type': types[type]} );
+    res.writeHead( status, {
+		'Content-Type': types[type],
+		'Access-Control-Allow-Origin': '*'
+    } );
     res.end( body );
 };
 
