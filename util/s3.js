@@ -1,10 +1,10 @@
 var api = require('../api/api'),
 	aws = require('aws-sdk'),
-	s3 = new aws.S3( {region: 'us-west-2'} );
+	s3 = new aws.S3({ region: 'us-west-2' });
 
 function uploadToS3( jsonData ) {
 	var params = {
-		Bucket: 'howwhatwhy',
+		Bucket: 'howwhatwhy.france-chance.com',
 		Body: `var todaysData = ${jsonData}`,
 		ContentType: 'text/json',
 		Key: 'todays-data.json'
