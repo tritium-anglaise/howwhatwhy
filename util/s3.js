@@ -7,7 +7,7 @@ function uploadToS3( jsonData ) {
 		Bucket: 'howwhatwhy.france-chance.com',
 		Body: `var todaysData = ${jsonData}`,
 		ContentType: 'text/json',
-		Key: 'todays-data.json'
+		Key: 'todays-data.js'
 	};
 
 	return new Promise((resolve, reject) => {
