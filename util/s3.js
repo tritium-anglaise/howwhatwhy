@@ -1,12 +1,14 @@
 var api = require('../api/api'),
 	aws = require('aws-sdk'),
-	s3 = new aws.S3({ region: 'us-west-2' });
+	s3 = new aws.S3({ region: 'us-west-2' }),
+	zlib = require('zlib');
 
 function uploadToS3( jsonData ) {
 	var params = {
 		Bucket: 'howwhatwhy.france-chance.com',
-		Body: `var todaysData = ${jsonData}`,
-		ContentType: 'text/json',
+		Body: zlib.gzipSync(`var todaysData = ${jsonData}`),
+		ContentType: 'application/javascript',
+		ContentEncoding: 'gzip',
 		Key: 'todays-data.js'
 	};
 
