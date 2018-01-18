@@ -1,20 +1,28 @@
-var db = require('../db/db').db;
+const db = require('../db/db').db,
+	regexes = {
+		how: /\b(h|H)ow\b/,
+		what: /\b(W|w)hat\b/,
+		why: /\b(W|w)hy\b/
+	},
+	getAdverbCounts = ( headlineObj )=> {
+		for( var regex in regexes ) {
+			if( regexes[ regex ].test( headlineObj.linktext ) ){
+				headlineObj[ regex ] = true;
+			}
+		}
 
-function returnDatabaseFunction( dbFuncName ) {
-	return function( param ) {
-		param = param === null ? [] : [ param ];
-
-		return new Promise(( resolve, reject ) => {
-			db.func(dbFuncName, param).then(( response )=> {
-				resolve({ status: 200, type: 'json', body: JSON.stringify(response)});
-			}).catch(( err )=> {
-				reject( err );
+		return headlineObj;
+	},
+	returnDatabaseFunction = ( dbFuncName ) => {
+		return function( param ) {
+			return new Promise(( resolve, reject ) => {
+				db.func(dbFuncName, param).then(( response )=> {
+					resolve({ status: 200, type: 'json', body: JSON.stringify(response.map(getAdverbCounts))});
+				}).catch(( err )=> {
+					reject( err );
+				});
 			});
-		});
-	}
-}
+		}
+	};
 
-exports.methods = {
-	counts:  returnDatabaseFunction( 'get_counts' ),
-	headlines: returnDatabaseFunction( 'get_links' )
-};
+exports.getHeadlines = returnDatabaseFunction( 'get_links' );

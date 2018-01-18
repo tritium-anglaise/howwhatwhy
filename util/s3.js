@@ -6,8 +6,8 @@ var api = require('../api/api'),
 function uploadToS3( jsonData ) {
 	var params = {
 		Bucket: 'howwhatwhy.france-chance.com',
-		Body: zlib.gzipSync(`var todaysData = ${jsonData}`),
-		ContentType: 'application/javascript',
+		Body: zlib.gzipSync(`var todaysData = ${jsonData};`),
+		ContentType: 'application/javascript; charset=UTF-8',
 		ContentEncoding: 'gzip',
 		Key: 'todays-data.js'
 	};

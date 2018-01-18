@@ -1,6 +1,4 @@
-'use strict';
-
-var pgp = require('./db').pgp,
+const pgp = require('./db').pgp,
 	db = require('./db').db;
 
 db.any( pgp.QueryFile('./sql/stored-procedures.sql') )

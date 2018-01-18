@@ -1,9 +1,4 @@
-'use strict';
-
-var db = require('../db/db').db;
-
-var api = require( '../api/api'),
-    dateRegEx = /(20[1-2][0-9])-([0-1][0-2])-([0-3][0-9])$/,
+const api = require( '../api/api'),
     http = require( 'http' ),
     server = http.createServer().listen( process.env.PORT ),
     types = {
@@ -11,67 +6,52 @@ var api = require( '../api/api'),
         text: 'text/plain'
     },
     validators = {
-        isDate: ( param ) => { return dateRegEx.test( param ); },
+		isValidQueryString: (queryType, queryVal) => {
+			return queryType === 'month' && typeof( queryVal ) !== 'undefined' && validators.isInteger( queryVal );
+		},
         isInteger: ( param ) => { return !isNaN(parseInt( param )); }
-    };
+    },
+	processAPIRequest = ( queryVal ) => {
+		return new Promise(( resolve, reject ) => {
+			resolve( api.getHeadlines( queryVal ) );
+		});
+	},
+	respond = ( res, status, type, body ) => {
+		type = type === undefined ? types.text : type;
+		body = body === undefined ? '' : body;
 
-var paramIsValid = ( param ) => {
-    if( validators.isDate( param ) ){
-        return true;
-    } else {
-        return validators.isInteger( param );
-    }
-};
-
-var parseParam = ( param ) => {
-    if( validators.isDate( param ) ){
-        return param;
-    } else if( validators.isInteger( param ) ){
-        return parseInt( param );
-    } else {
-        return null;
-    }
-};
-
-var processAPIRequest = ( requestParts ) => {
-    return new Promise(( resolve, reject ) => {
-        var method, param;
-        [,,method,param=null ] = requestParts;
-
-        if( api.methods[ method ] !== undefined ){
-            if( param !== null && paramIsValid( param ) ){
-                resolve( api.methods[ method ]( parseParam( param ) ) );
-            } else {
-                resolve( api.methods[ method ]( null ) );
-            }
-        } else {
-            reject( { status: 400, type: 'text', message: '' } );
-        }
-    });
-};
-
-var respond = ( res, status, type, body ) => {
-    type = type === undefined ? types.text : type;
-    body = body === undefined ? '' : body;
-
-    res.writeHead( status, {
-		'Content-Type': types[type],
-		'Access-Control-Allow-Origin': '*'
-    } );
-    res.end( body );
-};
+		res.writeHead( status, {
+			'Content-Type': types[type],
+			'Access-Control-Allow-Origin': '*',
+			'Access-Control-Allow-Headers': '*',
+			'Access-Control-Allow-Methods': 'GET',
+		} );
+		res.end( body );
+	};
 
 server.on( 'request', function( req, res ) {
-    var parts = req.url.toLowerCase().split( '/' );
+	let api, collection, queryType, queryVal;
+    [, api, collection] = req.url.toLowerCase().split( '/' );
 
-    if( parts[1] === 'api' ) {
-        processAPIRequest( parts )
+    try {
+		[queryType, queryVal] = collection.split('?')[1].split('=');
+	}
+	catch(e) {
+    	respond( res, 200, 'text', '' );
+	}
+
+	// simple test to make sure the request is for the 'api' and that the querystring
+	// conforms to our expectations
+    if( api === 'api' && validators.isValidQueryString( queryType, queryVal ) ) {
+        processAPIRequest( queryVal )
             .then(( data )=> {
                 respond( res, data.status, data.type, data.body );
             }).catch(( data ) => {
-            respond( res, 500, 'text', data.toString() );
-        });
+				respond( res, 500, 'text', data.toString() );
+			});
     } else {
-        respond( res, 200 );
-    }
+		respond( res, 200, 'text', '' );
+	}
 });
+
+console.log('Listening for requests on port ' + process.env.PORT);
